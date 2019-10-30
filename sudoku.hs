@@ -331,9 +331,15 @@ toIntList s = [ toInt [c] | c <- s ]
 -- program starts here
 main = do
 
-  -- TODO #17: validate the command-line and get the file name containing the board
-
-  -- TODO #18: read the contents of the board file into a string
+  -- validate the command-line and get the file name containing the board
+  args <- getArgs
+  if (length args /= 1)
+    then do
+      putStrLn "Error: Expected exactly one argument, containing the path of the board file!"
+      putStrLn "Aborting..."
+      exitFailure
+    else -- TODO #18: read the contents of the board file into a string
+      return()
 
   -- TODO #19: create a board from the string board (hint: use getBoard)
 
