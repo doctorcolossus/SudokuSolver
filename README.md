@@ -1,4 +1,4 @@
-# sudoku-solver
+# Sudoku Solver
 a Sudoku solver in Haskell
 
 This is a simple practice assignment for learning Haskell.
