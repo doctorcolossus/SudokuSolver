@@ -39,9 +39,8 @@ getBoard :: [Char] -> Board
        [0,9,8] ] -}
 getBoard board = [ toIntList line | line <- lines board ]
 
-{- TODO #2
-   getNRows :: Board -> Int
-   given a board, return its number of rows
+getNRows :: Board -> Int
+{- given a board, return its number of rows
    input:   a board
    output:  number of rows
    example: getNRows
@@ -56,10 +55,12 @@ getBoard board = [ toIntList line | line <- lines board ]
      [0,0,0,0,8,0,0,7,9] ] yields 9
    hint: use length
 -}
+getNRows board
+  | null board = 0
+  | otherwise  = length board
 
-{- TODO #3
-   getNCols :: Board -> Int
-   given a board, return its number of columns or 0 if rows do not have the same number of columns
+getNCols :: Board -> Int
+{- given a board, return its number of columns or 0 if rows do not have the same number of columns
    input:  a board
    output: number of columns
    examples:
@@ -85,6 +86,10 @@ getBoard board = [ toIntList line | line <- lines board ]
          with all the sizes of each row from the board;
          then decide whether all of the rows have the same size,
          returning that size if yes, or 0 otherwise -}
+getNCols board
+  | null board                                              = 0
+  | not (all (\b -> length b == length (head board)) board) = 0
+  | otherwise                                               = length (head board)
 
 {- TODO #4
    getBox :: Board -> Int -> Int -> Sequence
