@@ -5,6 +5,7 @@
 
 import System.Environment
 import System.IO
+import System.Exit
 import Data.List
 
 type Sequence = [Int]
@@ -332,14 +333,15 @@ toIntList s = [ toInt [c] | c <- s ]
 main = do
 
   -- validate the command-line and get the file name containing the board
+
   args <- getArgs
-  if (length args /= 1)
-    then do
-      putStrLn "Error: Expected exactly one argument, containing the path of the board file!"
-      putStrLn "Aborting..."
-      exitFailure
-    else -- TODO #18: read the contents of the board file into a string
-      return()
+
+  board <- if (length args == 1)
+           then readFile (head args)
+           else do
+             putStrLn "Error: Expected exactly one argument: path to board file!"
+             putStrLn "Aborting..."
+             exitFailure
 
   -- TODO #19: create a board from the string board (hint: use getBoard)
 
@@ -348,3 +350,5 @@ main = do
   -- TODO #21: print the solutions found
 
   print "Done!"
+
+-- vim: et ts=2 sts=2 sw=2
