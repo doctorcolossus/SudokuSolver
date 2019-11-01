@@ -92,10 +92,9 @@ getNCols board
   | otherwise =
     length (head board)
 
-{- TODO #4
-   getBox :: Board -> Int -> Int -> Sequence
-   given a board and box coordinates, return the correspondent box as a sequence
-   input: a board and two integer (box coordinates)
+getBox :: Board -> Int -> Int -> Sequence
+{- given a board and box coordinates, return the corresponding box as a sequence
+   input: a board and two integers (the box coordinates)
    output: a sequence
    example:
      getBox [ [5,3,0,0,7,0,0,0,0],
@@ -110,6 +109,9 @@ getNCols board
    hint: use list comprehension to filter the rows of the target box;
          then transpose what you got and apply the same reasoning to filter the columns;
          use concat to return the sequence -}
+getBox board x y = concat
+  (transpose [take 3 (drop (3*x) b) |
+              b <- take 3 (drop (3*y) board)])
 
 {- TODO #5
    getEmptySpot :: Board -> (Int, Int)
