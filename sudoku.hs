@@ -166,9 +166,8 @@ isGridValid :: Board -> Bool
    hint: use getNRows and getNCols -}
 isGridValid board = (getNRows board) == 9 && (getNCols board) == 9
 
-{- TODO #7
-   isSequenceValid :: Sequence -> Bool
-   return True/False depending whether the given sequence is valid or not,
+isSequenceValid :: Sequence -> Bool
+{- return True/False depending whether the given sequence is valid or not,
    according to sudoku rules
    input:  a sequence of digits from 0-9
    output: True/False
@@ -179,6 +178,9 @@ isGridValid board = (getNRows board) == 9 && (getNCols board) == 9
          that are different than zero;
          then determine whether there are digits
          that repeat in the created list -}
+isSequenceValid sequence = do
+  let nonzero = filter (/=0) sequence
+  nonzero == nub nonzero
 
 {- TODO #8
    areRowsValid :: Board -> Bool
