@@ -131,9 +131,8 @@ getNCols board
 
 -- ***** PREDICATE FUNCTIONS *****
 
-{- TODO #6
-   isGridValid :: Board -> Bool
-   given a board, return True/False
+isGridValid :: Board -> Bool
+{- given a board, return True/False
    depending whether the given board constitutes a valid grid
    (i.e., #rows = #cols = 9) or not
    input:  a board
@@ -165,6 +164,7 @@ getNCols board
                    [0,0,4,1,9,0,0,5],
                    [0,0,0,8,0,0,7,9] ] returns False
    hint: use getNRows and getNCols -}
+isGridValid board = (getNRows board) == 9 && (getNCols board) == 9
 
 {- TODO #7
    isSequenceValid :: Sequence -> Bool
