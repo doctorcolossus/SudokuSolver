@@ -256,9 +256,8 @@ setRowAt sequence index value
     (take index sequence) ++ [value] ++ (drop (index+1) sequence)
   | otherwise = sequence
 
-{- TODO #15
-   setBoardAt :: Board -> Int -> Int -> Int -> Board
-   given a board, two indexes i and j (representing coordinates), and a value,
+setBoardAt :: Board -> Int -> Int -> Int -> Board
+{- given a board, two indexes i and j (representing coordinates), and a value,
      writes the value at the (i, j) coordinate, returning the new board,
      but only if the original value at the specified location is empty;
      otherwise, return the original board unchanged
@@ -284,9 +283,13 @@ setRowAt sequence index value
                   [0,0,0,4,1,9,0,0,5],
                   [0,0,0,0,8,0,0,7,9] ]
    hint: use concatenation and setRowAt -}
+setBoardAt board x y value
+  | ((board !! y) !! x) /= 0 =
+    (take y board) ++ [setRowAt (board !! y) x value] ++ (drop (y+1) board)
+  | otherwise = board
 
 {- TODO #16
-   buildChoices :: Board -> Int -> Int -> [Board]
+   
    given a board and a two indexes i and j (representing coordinates),
      generate ALL possible boards, replacing the cell at (i, j)
      with ALL possible digits from 1 to 9;
