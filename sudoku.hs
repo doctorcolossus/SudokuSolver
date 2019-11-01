@@ -87,9 +87,10 @@ getNCols :: Board -> Int
          then decide whether all of the rows have the same size,
          returning that size if yes, or 0 otherwise -}
 getNCols board
-  | null board                                              = 0
-  | not (all (\b -> length b == length (head board)) board) = 0
-  | otherwise                                               = length (head board)
+  | null board = 0
+  | not (all (\b -> length b == length (head board)) (tail board)) = 0
+  | otherwise =
+    length (head board)
 
 {- TODO #4
    getBox :: Board -> Int -> Int -> Sequence
