@@ -7,6 +7,7 @@ import System.Environment
 import System.IO
 import System.Exit
 import Data.List
+import Data.Maybe
 
 type Sequence = [Int]
 type Board    = [Sequence]
@@ -113,9 +114,8 @@ getBox board x y = concat
   (transpose [take 3 (drop (3*x) b) |
               b <- take 3 (drop (3*y) board)])
 
-{- TODO #5
-   getEmptySpot :: Board -> (Int, Int)
-   given a board, return the first location that is empty (i.e., it has zero), if one exists; OK to assume that you will only call this function when you know that there is an empty spot
+getEmptySpot :: Board -> (Int, Int)
+{- given a board, return the first location that is empty (i.e., it has zero), if one exists; OK to assume that you will only call this function when you know that there is an empty spot
    input:   a board
    output:  a tuple with the coordinates (i, j) of the empty spot found
    example:
@@ -127,10 +127,11 @@ getBox board x y = concat
                     [7,0,0,0,2,0,0,0,6],
                     [0,6,0,0,0,0,2,8,0],
                     [0,0,0,4,1,9,0,0,5],
-                    [0,0,0,0,8,0,0,7,9] ] yields (0,2)
-   hint: use list comprehension
-         to generate all the coordinates of the board that are empty;
-         use head to return the first coordinate of your list-}
+                    [0,0,0,0,8,0,0,7,9] ] yields (0,2) -}
+getEmptySpot board = do
+  let y = fromJust(findIndex (elem 0) board)
+  let x = fromJust(findIndex (==0) (board !! y))
+  (x, y)
 
 -- ***** PREDICATE FUNCTIONS *****
 
