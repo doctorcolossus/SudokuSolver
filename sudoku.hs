@@ -201,12 +201,16 @@ areColsValid :: Board -> Bool
 areColsValid board =
   areRowsValid (transpose board)
 
-{- TODO #10
-   areBoxesValid :: Board -> Bool
-   return True/False depending whether ALL of the box sequences are valid or not
+areBoxesValid :: Board -> Bool
+{- return True/False depending whether ALL of the box sequences are valid or not
    input:  a board
    output: True/False
    hint:   use list comprehension, isSequenceValid, and getBox -}
+areBoxesValid board =
+  all isSequenceValid [getBox board x y |
+                       (x, y) <- [(x, y) |
+                                  x <- [0..2],
+                                  y <- [0..2]]]
 
 {- TODO #11
    isValid :: Board -> Bool
