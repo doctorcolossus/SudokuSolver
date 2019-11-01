@@ -212,13 +212,16 @@ areBoxesValid board =
                                   x <- [0..2],
                                   y <- [0..2]]]
 
-{- TODO #11
-   isValid :: Board -> Bool
-   return True/False
+isValid :: Board -> Bool
+{- return True/False
      depending whether the given board is valid sudoku configuration or not
    input:  a board
    output: True/False
    hint:   use isGridValid, areRowsValid, areColsValid, and areBoxesValid -}
+isValid board = (isGridValid board) &&
+                (areRowsValid board) &&
+                (areColsValid board) &&
+                (areBoxesValid board)
 
 isCompleted :: Board -> Bool
 {- return True/False depending whether the given board is completed or not;
