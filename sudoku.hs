@@ -231,12 +231,12 @@ isCompleted :: Board -> Bool
    hint:   use list comprehension and the elem function -}
 isCompleted board = and [not (elem 0 l) | l <- board]
 
-{- TODO #13
-   isSolved :: Board -> Bool
-   return True/False depending whether the given board is solved or not;
+isSolved :: Board -> Bool
+{- return True/False depending whether the given board is solved or not;
      a board is solved if it is completed and still valid
    input:  a board
    output: True/False -}
+isSolved board = (isCompleted board) && (isSolved board)
 
 -- ***** SETTER FUNCTIONS *****
 
