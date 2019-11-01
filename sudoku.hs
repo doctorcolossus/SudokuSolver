@@ -336,12 +336,11 @@ buildChoices :: Board -> Int -> Int -> [Board]
 buildChoices board x y =
   [setBoardAt board x y value | value <- [0..9]]
 
--- solve :: Board -> [Board]
+solve :: Board -> [Board]
 {- given a board, finds all possible solutions
    (dead ends and invalid intermediate solutions are listed as empty boards)
    input:       a board
    output:      a list of boards from the original board -}
-{-
 solve board
   | isSolved board = [board]
   | isCompleted board = [[[]]]
@@ -351,11 +350,11 @@ solve board
       emptySpot = getEmptySpot board
       i = fst emptySpot
       j = snd emptySpot
--}
 
 main = do -- program starts here
 
   args <- getArgs
+
   b <- if (length args == 1) -- validate the command-line
        then readFile (head args) -- read in the specified board file
        else do
@@ -364,10 +363,12 @@ main = do -- program starts here
          exitFailure
 
   let board = getBoard b -- create a board from the string board
+  
+  print board
 
-  -- TODO #20: use solve to find the solutions, disconsidering the ones that are [[]]
+  let solved = solve board -- find the solutions, disconsidering the [[]] ones
 
-  -- TODO #21: print the solutions found
+  print solved -- print the solutions found
 
   print "Done!"
 
