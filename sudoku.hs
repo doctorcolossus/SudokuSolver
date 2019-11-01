@@ -240,9 +240,8 @@ isSolved board = (isCompleted board) && (isSolved board)
 
 -- ***** SETTER FUNCTIONS *****
 
-{- TODO #14
-   setRowAt :: Sequence -> Int -> Int -> Sequence
-   given a sequence, an index, and a value,
+setRowAt :: Sequence -> Int -> Int -> Sequence
+{- given a sequence, an index, and a value,
      writes the value at the index location, returning a new sequence,
      but only if the original value at the specified location is empty;
      otherwise, return the original sequence unchanged
@@ -252,6 +251,10 @@ isSolved board = (isCompleted board) && (isSolved board)
      setRowAt [1, 2, 3, 0, 4, 5] 3 9 yields [1,2,3,9,4,5]
      setRowAt [1, 2, 3, 8, 4, 5] 3 9 yields [1,2,3,8,4,5]
    hint: use concatenation, take, and drop -}
+setRowAt sequence index value
+  | sequence !! index /= 0 =
+    (take index sequence) ++ [value] ++ (drop (index+1) sequence)
+  | otherwise = sequence
 
 {- TODO #15
    setBoardAt :: Board -> Int -> Int -> Int -> Board
