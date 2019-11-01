@@ -182,19 +182,20 @@ isSequenceValid sequence = do
   let nonzero = filter (/=0) sequence
   nonzero == nub nonzero
 
-{- TODO #8
-   areRowsValid :: Board -> Bool
-   return True/False depending whether ALL of the row sequences are valid or not
+areRowsValid :: Board -> Bool
+{- return True/False depending whether ALL of the row sequences are valid or not
    input:  a board
    output: True/False
    hint:   use list comprehension and isSequenceValid -}
+areRowsValid board =
+   all (isSequenceValid) board
 
-{- TODO #9
-   areColsValid :: Board -> Bool
-   return True/False depending whether ALL of the col sequences are valid or not
+areColsValid :: Board -> Bool
+{- return True/False depending whether ALL of the col sequences are valid or not
    input:  a board
-   output: True/False
-   hint:   use areRowsValid of the transposed board -}
+   output: True/False -}
+areColsValid board =
+  areRowsValid (transpose board)
 
 {- TODO #10
    areBoxesValid :: Board -> Bool
