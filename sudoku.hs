@@ -288,10 +288,8 @@ setBoardAt board x y value
     (take y board) ++ [setRowAt (board !! y) x value] ++ (drop (y+1) board)
   | otherwise = board
 
-{- TODO #16
-   
-   given a board and a two indexes i and j (representing coordinates),
-     generate ALL possible boards, replacing the cell at (i, j)
+buildChoices :: Board -> Int -> Int -> [Board]
+{- generate ALL possible boards, replacing the cell at (i, j)
      with ALL possible digits from 1 to 9;
      OK to assume that the cell at (i, j) is empty
    input:  a board and two indexes (i, j)
@@ -334,8 +332,9 @@ setBoardAt board x y value
                       [0,6,0,0,0,0,2,8,0],
                       [0,0,0,4,1,9,0,0,5],
                       [0,0,0,0,8,0,0,7,9] ]
-                    ]
-   hint: use list comprehension and the function setBoardAt -}
+                    ] -}
+buildChoices board x y =
+  [setBoardAt board x y value | value <- [0..9]]
 
 -- solve :: Board -> [Board]
 {- given a board, finds all possible solutions
