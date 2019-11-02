@@ -136,6 +136,17 @@ getEmptySpot board = do
   let x = fromJust(findIndex (==0) (board !! y))
   (x, y)
 
+getOptions :: Board -> Int -> Int -> [Int]
+-- given a board and x & y coordinates, return its set of valid possible solutions
+getOptions board x y = do
+  let usedInBox = [b | b <- getBox board (div x 3) (div y 3), b /= 0]
+  let usedInRow = [r | r <- board !! y, r /= 0]
+  let usedInCol = [c | c <- [c !! x | c <- board], c /= 0]
+  [o | o <- [1..9],
+       not (elem o usedInBox),
+       not (elem o usedInRow),
+       not (elem o usedInCol)]
+
 -- ***** PREDICATE FUNCTIONS *****
 
 isGridValid :: Board -> Bool
@@ -290,17 +301,6 @@ setBoardAt board x y value
   | ((board !! y) !! x) == 0 =
     (take y board) ++ [setRowAt (board !! y) x value] ++ (drop (y+1) board)
   | otherwise = board
-
-getOptions :: Board -> Int -> Int -> [Int]
--- given a board and x & y coordinates, return its set of valid possible solutions
-getOptions board x y = do
-  let usedInBox = [b | b <- getBox board (div x 3) (div y 3), b /= 0]
-  let usedInRow = [r | r <- board !! y, r /= 0]
-  let usedInCol = [c | c <- [c !! x | c <- board], c /= 0]
-  [o | o <- [1..9],
-       not (elem o usedInBox),
-       not (elem o usedInRow),
-       not (elem o usedInCol)]
 
 buildChoices :: Board -> Int -> Int -> [Board]
 {- generate ALL possible boards, replacing the cell at (i, j)
