@@ -370,9 +370,9 @@ main = do -- program starts here
   
   print board
 
-  let solved = solve board -- find the solutions, disconsidering the [[]] ones
+  let solutions = [s | s <- solve board, s /= [[]]] -- ignore empty results
 
-  print solved -- print the solutions found
+  print solutions
 
   print "Done!"
 
