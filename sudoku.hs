@@ -354,6 +354,15 @@ solve board
       i = fst emptySpot
       j = snd emptySpot
 
+printBoard :: Board -> IO ()
+-- pretty-print a given board
+printBoard board = mapM_ putStrLn
+                   [id (intercalate " " row) |
+                    row <- [[show row |
+                             row <- b] |
+                            b <- board]
+                    ++ [[""]]]
+
 main = do -- program starts here
 
   args <- getArgs
@@ -368,11 +377,13 @@ main = do -- program starts here
 
   let board = getBoard b -- create a board from the string board
   
-  print board
+  putStrLn "problem:"
+  printBoard board
 
   let solutions = [s | s <- solve board, s /= [[]]] -- ignore empty results
 
-  print solutions
+  putStrLn "solutions:"
+  mapM_ printBoard solutions
 
   print "Done!"
 
