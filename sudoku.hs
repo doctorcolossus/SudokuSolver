@@ -115,7 +115,10 @@ getBox board x y = concat
               b <- take 3 (drop (3*y) board)])
 
 getEmptySpot :: Board -> (Int, Int)
-{- given a board, return the first location that is empty (i.e., it has zero), if one exists; OK to assume that you will only call this function when you know that there is an empty spot
+{- given a board, return the first location
+    that is empty (i.e., it has zero), if one exists;
+    OK to assume that you will only call this function
+   when you know that there is an empty spot
    input:   a board
    output:  a tuple with the coordinates (i, j) of the empty spot found
    example:
@@ -252,7 +255,7 @@ setRowAt :: Sequence -> Int -> Int -> Sequence
      setRowAt [1, 2, 3, 8, 4, 5] 3 9 yields [1,2,3,8,4,5]
    hint: use concatenation, take, and drop -}
 setRowAt sequence index value
-  | sequence !! index /= 0 =
+  | sequence !! index == 0 =
     (take index sequence) ++ [value] ++ (drop (index+1) sequence)
   | otherwise = sequence
 
@@ -284,7 +287,7 @@ setBoardAt :: Board -> Int -> Int -> Int -> Board
                   [0,0,0,0,8,0,0,7,9] ]
    hint: use concatenation and setRowAt -}
 setBoardAt board x y value
-  | ((board !! y) !! x) /= 0 =
+  | ((board !! y) !! x) == 0 =
     (take y board) ++ [setRowAt (board !! y) x value] ++ (drop (y+1) board)
   | otherwise = board
 
@@ -355,12 +358,13 @@ main = do -- program starts here
 
   args <- getArgs
 
-  b <- if (length args == 1) -- validate the command-line
-       then readFile (head args) -- read in the specified board file
-       else do
-         putStrLn "Error: Expected exactly one argument: path to board file!"
-         putStrLn "Aborting..."
-         exitFailure
+  if (length args /= 1) then do -- validate the command-line
+    putStrLn "Error: Expected exactly one argument: path to board file!"
+    putStrLn "Aborting..."
+    exitFailure
+    else return()
+
+  b <- readFile (head args) -- read in the specified board file
 
   let board = getBoard b -- create a board from the string board
   
