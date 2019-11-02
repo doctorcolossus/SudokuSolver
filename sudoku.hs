@@ -337,7 +337,7 @@ buildChoices :: Board -> Int -> Int -> [Board]
                       [0,0,0,0,8,0,0,7,9] ]
                     ] -}
 buildChoices board x y =
-  [setBoardAt board x y value | value <- [0..9]]
+  [setBoardAt board x y value | value <- [1..9]]
 
 solve :: Board -> [Board]
 {- given a board, finds all possible solutions
