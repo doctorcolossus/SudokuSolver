@@ -356,7 +356,6 @@ solve :: Board -> [Board]
    input:       a board
    output:      a list of boards from the original board -}
 solve board
-  | null board = [[[]]]
   | isCompleted board = 
     if isValid board
      then [board]
