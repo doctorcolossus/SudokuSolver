@@ -291,6 +291,17 @@ setBoardAt board x y value
     (take y board) ++ [setRowAt (board !! y) x value] ++ (drop (y+1) board)
   | otherwise = board
 
+getOptions :: Board -> Int -> Int -> [Int]
+-- given a board and x & y coordinates, return its set of valid possible solutions
+getOptions board x y = do
+  let usedInBox = [b | b <- getBox board (div x 3) (div y 3), b /= 0]
+  let usedInRow = [r | r <- board !! y, r /= 0]
+  let usedInCol = [c | c <- [c !! x | c <- board], c /= 0]
+  [o | o <- [1..9],
+       not (elem o usedInBox),
+       not (elem o usedInRow),
+       not (elem o usedInCol)]
+
 buildChoices :: Board -> Int -> Int -> [Board]
 {- generate ALL possible boards, replacing the cell at (i, j)
      with ALL possible digits from 1 to 9;
@@ -337,7 +348,7 @@ buildChoices :: Board -> Int -> Int -> [Board]
                       [0,0,0,0,8,0,0,7,9] ]
                     ] -}
 buildChoices board x y =
-  [setBoardAt board x y value | value <- [1..9]]
+  [setBoardAt board x y value | value <- (getOptions board x y)]
 
 solve :: Board -> [Board]
 {- given a board, finds all possible solutions
@@ -345,7 +356,8 @@ solve :: Board -> [Board]
    input:       a board
    output:      a list of boards from the original board -}
 solve board
-  | isCompleted board =
+  | null board = [[[]]]
+  | isCompleted board = 
     if isValid board
      then [board]
      else [[[]]]
