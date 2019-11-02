@@ -111,8 +111,8 @@ getBox :: Board -> Int -> Int -> Sequence
          then transpose what you got and apply the same reasoning to filter the columns;
          use concat to return the sequence -}
 getBox board x y = concat
-  (transpose [take 3 (drop (3*x) b) |
-              b <- take 3 (drop (3*y) board)])
+                   (transpose [take 3 (drop (3*x) b) |
+                               b <- take 3 (drop (3*y) board)])
 
 getEmptySpot :: Board -> (Int, Int)
 {- given a board, return the first location
@@ -345,14 +345,16 @@ solve :: Board -> [Board]
    input:       a board
    output:      a list of boards from the original board -}
 solve board
-  | isSolved board = [board]
-  | isCompleted board = [[[]]]
-  | not (isValid board) = [[[]]]
-  | otherwise = concat [ solve choice | choice <- buildChoices board i j ]
-    where
-      emptySpot = getEmptySpot board
-      i = fst emptySpot
-      j = snd emptySpot
+  | isCompleted board =
+    if isValid board
+     then [board]
+     else [[[]]]
+  | otherwise = concat [solve choice |
+                        choice <- buildChoices board i j ]
+                where
+                  emptySpot = getEmptySpot board
+                  i = fst emptySpot
+                  j = snd emptySpot
 
 printBoard :: Board -> IO ()
 -- pretty-print a given board
