@@ -144,7 +144,19 @@ impossibleElsewhereInBox board i j value = do
                 x <- [3 * boxX + x | x <- [0..2]],
                 y <- [3 * boxY + y | y <- [0..2]],
                 x /= i || y /= j]
-  
+
+impossibleElsewhereInRow :: Board -> Int -> Int -> Int -> Bool
+impossibleElsewhereInRow board i j value = do
+  all (==True) [not (elem value (getOptions board x j)) |
+                x <- [0..8],
+                x /= i]
+
+impossibleElsewhereInCol :: Board -> Int -> Int -> Int -> Bool
+impossibleElsewhereInCol board i j value = do
+  all (==True) [not (elem value (getOptions board i y)) |
+                y <- [0..8],
+                y /= j]
+ 
 getOptions :: Board -> Int -> Int -> [Int]
 -- given a board and x & y coordinates, return its set of valid possible solutions
 getOptions board x y
@@ -162,9 +174,16 @@ getFilteredOptions :: Board -> Int -> Int -> [Int]
 getFilteredOptions board x y = do
   let options = getOptions board x y
   if (length options) > 1 then do
-    let impossibleElsewhere = [impossibleElsewhereInBox board x y option | option <- options]
-    let i = findIndex (==True) impossibleElsewhere
-    if not (isNothing i) then [options !! fromJust(i)] else options
+    let impossible = [impossibleElsewhereInBox board x y option | option <- options]
+    let i = findIndex (==True) impossible
+    if not (isNothing i) then [options !! fromJust(i)] else do
+      let impossible = [impossibleElsewhereInRow board x y option | option <- options]
+      let i = findIndex (==True) impossible
+      if not (isNothing i) then [options !! fromJust(i)] else do
+        if not (isNothing i) then [options !! fromJust(i)] else do
+          let impossible = [impossibleElsewhereInCol board x y option | option <- options]
+          let i = findIndex (==True) impossible
+          if not (isNothing i) then [options !! fromJust(i)] else options
   else
     options
 
@@ -271,7 +290,7 @@ isSolved :: Board -> Bool
      a board is solved if it is completed and still valid
    input:  a board
    output: True/False -}
-isSolved board = (isCompleted board) && (isSolved board)
+isSolved board = (isCompleted board) && (isValid board)
 
 -- ***** SETTER FUNCTIONS *****
 
