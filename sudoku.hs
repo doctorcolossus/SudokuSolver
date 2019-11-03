@@ -135,6 +135,19 @@ getEmptySpot board = do
   let y = fromJust(findIndex (elem 0) board)
   let x = fromJust(findIndex (==0) (board !! y))
   (x, y)
+ 
+getOptions :: Board -> Int -> Int -> [Int]
+-- given a board and x & y coordinates, return its set of valid possible solutions
+getOptions board x y
+  | ((board !! y) !! x) /= 0 = []
+  | otherwise = do
+    let usedInBox = [b | b <- getBox board (div x 3) (div y 3), b /= 0]
+    let usedInRow = [r | r <- board !! y, r /= 0]
+    let usedInCol = [c | c <- [c !! x | c <- board], c /= 0]
+    [o | o <- [1..9],
+         not (elem o usedInBox),
+         not (elem o usedInRow),
+         not (elem o usedInCol)]
 
 impossibleElsewhereInBox :: Board -> Int -> Int -> Int -> Bool
 impossibleElsewhereInBox board i j value = do
@@ -156,36 +169,28 @@ impossibleElsewhereInCol board i j value = do
   all (==True) [not (elem value (getOptions board i y)) |
                 y <- [0..8],
                 y /= j]
- 
-getOptions :: Board -> Int -> Int -> [Int]
--- given a board and x & y coordinates, return its set of valid possible solutions
-getOptions board x y
-  | ((board !! y) !! x) /= 0 = []
+
+singleOutOption :: Board -> Int -> Int -> [Int]
+                   -> [(Board -> Int -> Int -> Int -> Bool)]
+                   -> [Int]
+singleOutOption board x y options filters
+  | length options == 1 = options
+  | null filters = options
   | otherwise = do
-    let usedInBox = [b | b <- getBox board (div x 3) (div y 3), b /= 0]
-    let usedInRow = [r | r <- board !! y, r /= 0]
-    let usedInCol = [c | c <- [c !! x | c <- board], c /= 0]
-    [o | o <- [1..9],
-         not (elem o usedInBox),
-         not (elem o usedInRow),
-         not (elem o usedInCol)]
+      let filtered = filter ((head filters) board x y) options
+      if null filtered
+      then options
+      else
+        if length filtered == 1
+        then filtered
+        else singleOutOption board x y options (tail filters)
 
 getFilteredOptions :: Board -> Int -> Int -> [Int]
 getFilteredOptions board x y = do
   let options = getOptions board x y
-  if (length options) > 1 then do
-    let impossible = [impossibleElsewhereInBox board x y option | option <- options]
-    let i = findIndex (==True) impossible
-    if not (isNothing i) then [options !! fromJust(i)] else do
-      let impossible = [impossibleElsewhereInRow board x y option | option <- options]
-      let i = findIndex (==True) impossible
-      if not (isNothing i) then [options !! fromJust(i)] else do
-        if not (isNothing i) then [options !! fromJust(i)] else do
-          let impossible = [impossibleElsewhereInCol board x y option | option <- options]
-          let i = findIndex (==True) impossible
-          if not (isNothing i) then [options !! fromJust(i)] else options
-  else
-    options
+  singleOutOption board x y options [impossibleElsewhereInBox,
+                                     impossibleElsewhereInRow,
+                                     impossibleElsewhereInCol]
 
 -- ***** PREDICATE FUNCTIONS *****
 
