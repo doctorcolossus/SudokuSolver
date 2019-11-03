@@ -185,12 +185,50 @@ singleOutOption board x y options filters
         then filtered
         else singleOutOption board x y options (tail filters)
 
+mustGoInAnotherBoxInRow :: Board -> Int -> Int -> Int -> Bool
+-- checks if value must be contained by one of the other two boxes in the row
+mustGoInAnotherBoxInRow board i j value =
+  any (==True) [all not
+                [elem value (getOptions board x y) |
+                 x <- [(3 * box + 0)..(3 * box + 2)],
+                 y <- [(3 * (div j 3))..(3 * (div j 3) + 2)],
+                 y /= j,
+                 ((board !! y) !! x) == 0] |
+                box <- [0..2],
+                box /= (div i 3),
+                any (==True) [elem value (getOptions board x j) |
+                              x <- [(3 * box + 0)..(3 * box + 2)]]]
+
+mustGoInAnotherBoxInCol :: Board -> Int -> Int -> Int -> Bool
+-- checks if value must be contained by one of the other two boxes in the column
+mustGoInAnotherBoxInCol board i j value =
+  any (==True) [all not
+                [elem value (getOptions board x y) |
+                 x <- [(3 * (div i 3))..(3 * (div i 3) + 2)],
+                 y <- [(3 * box + 0)..(3 * box + 2)],
+                 x /= i,
+                 ((board !! y) !! x) == 0] |
+                box <- [0..2],
+                box /= (div j 3),
+                any (==True) [elem value (getOptions board i y) |
+                              y <- [(3 * box + 0)..(3 * box + 2)]]]
+
+ruleFour board x y options =
+  [o | o <- options,
+       not (mustGoInAnotherBoxInRow board x y o),
+       not (mustGoInAnotherBoxInCol board x y o)]
+
 getFilteredOptions :: Board -> Int -> Int -> [Int]
 getFilteredOptions board x y = do
   let options = getOptions board x y
-  singleOutOption board x y options [impossibleElsewhereInBox,
-                                     impossibleElsewhereInRow,
-                                     impossibleElsewhereInCol]
+  let singledOut = singleOutOption board x y options [impossibleElsewhereInCol,
+                                                      impossibleElsewhereInRow,
+                                                      impossibleElsewhereInBox]
+  if (length singledOut) == 1
+  then singledOut
+  else ruleFour board x y options
+  -- ruleFourOnRow board x y options
+  -- options
 
 -- ***** PREDICATE FUNCTIONS *****
 
