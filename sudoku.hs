@@ -136,17 +136,6 @@ getEmptySpot board = do
   let x = fromJust(findIndex (==0) (board !! y))
   (x, y)
 
-getOptions :: Board -> Int -> Int -> [Int]
--- given a board and x & y coordinates, return its set of valid possible solutions
-getOptions board x y = do
-  let usedInBox = [b | b <- getBox board (div x 3) (div y 3), b /= 0]
-  let usedInRow = [r | r <- board !! y, r /= 0]
-  let usedInCol = [c | c <- [c !! x | c <- board], c /= 0]
-  [o | o <- [1..9],
-       not (elem o usedInBox),
-       not (elem o usedInRow),
-       not (elem o usedInCol)]
-
 -- ***** PREDICATE FUNCTIONS *****
 
 isGridValid :: Board -> Bool
@@ -250,7 +239,7 @@ isSolved :: Board -> Bool
      a board is solved if it is completed and still valid
    input:  a board
    output: True/False -}
-isSolved board = (isCompleted board) && (isSolved board)
+isSolved board = (isCompleted board) && (isValid board)
 
 -- ***** SETTER FUNCTIONS *****
 
@@ -297,10 +286,18 @@ setBoardAt :: Board -> Int -> Int -> Int -> Board
                   [0,0,0,4,1,9,0,0,5],
                   [0,0,0,0,8,0,0,7,9] ]
    hint: use concatenation and setRowAt -}
-setBoardAt board x y value
-  | ((board !! y) !! x) == 0 =
-    (take y board) ++ [setRowAt (board !! y) x value] ++ (drop (y+1) board)
-  | otherwise = board
+setBoardAt board x y value = (concat [take x board, [setRowAt (board !! x) y value], drop (x+1) board])
+
+getOptions :: Board -> Int -> Int -> [Int]
+-- given a board and x & y coordinates, return its set of valid possible solutions
+getOptions board x y = do
+  let usedInBox = [b | b <- getBox board (div x 3) (div y 3), b /= 0]
+  let usedInRow = [r | r <- board !! y, r /= 0]
+  let usedInCol = [c | c <- [c !! x | c <- board], c /= 0]
+  [o | o <- [1..9],
+       not (elem o usedInBox),
+       not (elem o usedInRow),
+       not (elem o usedInCol)]
 
 buildChoices :: Board -> Int -> Int -> [Board]
 {- generate ALL possible boards, replacing the cell at (i, j)
@@ -348,24 +345,25 @@ buildChoices :: Board -> Int -> Int -> [Board]
                       [0,0,0,0,8,0,0,7,9] ]
                     ] -}
 buildChoices board x y =
-  [setBoardAt board x y value | value <- (getOptions board x y)]
+  [setBoardAt board x y value | value <- [1..9]]
 
 solve :: Board -> [Board]
 {- given a board, finds all possible solutions
    (dead ends and invalid intermediate solutions are listed as empty boards)
    input:       a board
    output:      a list of boards from the original board -}
+
 solve board
-  | isCompleted board = 
-    if isValid board
-     then [board]
-     else [[[]]]
-  | otherwise = concat [solve choice |
-                        choice <- buildChoices board i j ]
-                where
-                  emptySpot = getEmptySpot board
-                  i = fst emptySpot
-                  j = snd emptySpot
+  | isSolved board = [board]
+  | isCompleted board = [[[]]]
+  | not (isValid board) = [[[]]]
+  | otherwise = concat [ solve choice | choice <- buildChoices board i j ]
+    where
+      emptySpot = getEmptySpot board
+      i = fst emptySpot
+      j = snd emptySpot
+
+validChoices b = [ v | v <- solve b, length v > 1]
 
 printBoard :: Board -> IO ()
 -- pretty-print a given board
@@ -386,18 +384,14 @@ main = do -- program starts here
     exitFailure
     else return()
 
-  b <- readFile (head args) -- read in the specified board file
-
-  let board = getBoard b -- create a board from the string board
-  
+  b <- openFile (args !! 0) ReadMode -- read in the specified board file
+  contents <- hGetContents b
+  let board = getBoard contents -- create a board from the string board
+  let solvedBoards = validChoices board
   putStrLn "problem:"
-  printBoard board
 
-  let solutions = [s | s <- solve board, s /= [[]]] -- ignore empty results
 
-  putStrLn "solutions:"
-  mapM_ printBoard solutions
-
+  print solvedBoards
   print "Done!"
 
 -- vim: et ts=2 sts=2 sw=2
