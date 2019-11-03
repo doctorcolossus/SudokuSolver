@@ -136,16 +136,37 @@ getEmptySpot board = do
   let x = fromJust(findIndex (==0) (board !! y))
   (x, y)
 
+impossibleElsewhereInBox :: Board -> Int -> Int -> Int -> Bool
+impossibleElsewhereInBox board i j value = do
+  let boxX = div i 3
+  let boxY = div j 3
+  all (==True) [not (elem value (getOptions board x y)) |
+                x <- [3 * boxX + x | x <- [0..2]],
+                y <- [3 * boxY + y | y <- [0..2]],
+                x /= i || y /= j]
+  
 getOptions :: Board -> Int -> Int -> [Int]
 -- given a board and x & y coordinates, return its set of valid possible solutions
-getOptions board x y = do
-  let usedInBox = [b | b <- getBox board (div x 3) (div y 3), b /= 0]
-  let usedInRow = [r | r <- board !! y, r /= 0]
-  let usedInCol = [c | c <- [c !! x | c <- board], c /= 0]
-  [o | o <- [1..9],
-       not (elem o usedInBox),
-       not (elem o usedInRow),
-       not (elem o usedInCol)]
+getOptions board x y
+  | ((board !! y) !! x) /= 0 = []
+  | otherwise = do
+    let usedInBox = [b | b <- getBox board (div x 3) (div y 3), b /= 0]
+    let usedInRow = [r | r <- board !! y, r /= 0]
+    let usedInCol = [c | c <- [c !! x | c <- board], c /= 0]
+    [o | o <- [1..9],
+         not (elem o usedInBox),
+         not (elem o usedInRow),
+         not (elem o usedInCol)]
+
+getFilteredOptions :: Board -> Int -> Int -> [Int]
+getFilteredOptions board x y = do
+  let options = getOptions board x y
+  if (length options) > 1 then do
+    let impossibleElsewhere = [impossibleElsewhereInBox board x y option | option <- options]
+    let i = findIndex (==True) impossibleElsewhere
+    if not (isNothing i) then [options !! fromJust(i)] else options
+  else
+    options
 
 -- ***** PREDICATE FUNCTIONS *****
 
@@ -348,7 +369,7 @@ buildChoices :: Board -> Int -> Int -> [Board]
                       [0,0,0,0,8,0,0,7,9] ]
                     ] -}
 buildChoices board x y =
-  [setBoardAt board x y value | value <- (getOptions board x y)]
+  [setBoardAt board x y value | value <- (getFilteredOptions board x y)]
 
 solve :: Board -> [Board]
 {- given a board, finds all possible solutions
