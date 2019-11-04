@@ -1,7 +1,7 @@
--- CS3210 - Principles of Programming Languages - Fall 2019
--- Programming Assignment 02 - A Sudoku Solver
--- Author(s): Casey Jones, Conor McCandless
--- Date: November 3rd, 2019
+{- CS3210 - Principles of Programming Languages - Fall 2019
+   Programming Assignment 02 - A Sudoku Solver
+   Author(s): Casey Jones, Conor McCandless
+   Date: November 3rd, 2019 -}
 
 import System.Environment
 import System.IO
@@ -142,14 +142,15 @@ getOptions :: Board -> Int -> Int -> [Int]
    output: the list of all possible values for the square at those coordinates -}
 getOptions board x y
   | ((board !! y) !! x) /= 0 = []
-  | otherwise = do
-    let usedInBox = [b | b <- getBox board (div x 3) (div y 3), b /= 0]
-    let usedInRow = [r | r <- board !! y, r /= 0]
-    let usedInCol = [c | c <- [c !! x | c <- board], c /= 0]
+  | otherwise =
     [o | o <- [1..9],
          not (elem o usedInBox),
          not (elem o usedInRow),
          not (elem o usedInCol)]
+    where
+      usedInBox = [b | b <- getBox board (div x 3) (div y 3), b /= 0]
+      usedInRow = [r | r <- board !! y, r /= 0]
+      usedInCol = [c | c <- [c !! x | c <- board], c /= 0]
 
 singleOutOption :: Board -> Int -> Int -> [Int]
                    -> [(Board -> Int -> Int -> Int -> Bool)]
