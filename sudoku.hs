@@ -26,9 +26,14 @@
    All three constraints take full advantage of Haskellian laziness
      of execution. For example, the list comprehension which applies rule 4
      will short-circuit checking the second filter if the first applies.
-   Immutability of data is also preserved.
-   Finally, the Haskellian map function is used to pretty-print boards
-     and their solutions.
+   Higher-order Haskellian functions, such as all, any, and map are used.
+     map is used to pretty-print boards and their solutions.
+     all and any, which also behave lazily, are used to check possible
+     values in other squares.
+   Lastly, immutability of data is preserved.
+   In summary, this version is more Haskellian by virtue of the extended
+     range of Haskell-specific language features which it exploits for
+     great good.
    -}
 
 import System.Environment
@@ -329,13 +334,6 @@ isCompleted :: Board -> Bool
    output: True/False
    hint:   use list comprehension and the elem function -}
 isCompleted board = and [not (elem 0 l) | l <- board]
-
-isSolved :: Board -> Bool
-{- returns True/False, depending on whether the given board is solved or not;
-     A board is solved if it is completed and still valid.
-   input:  a board
-   output: True/False -}
-isSolved board = (isCompleted board) && (isValid board)
 
 impossibleElsewhereInBox :: Board -> Int -> Int -> Int -> Bool
 {- returns True/False, depending on whether or not the value is possible
