@@ -32,9 +32,8 @@
      values in other squares.
    Lastly, immutability of data is preserved.
    In summary, this version is more Haskellian by virtue of the extended
-     range of Haskell-specific language features which it exploits for
-     great good.
-   -}
+     range of Haskell-specific language features which it exploits...
+     for great good! -}
 
 import System.Environment
 import System.IO
