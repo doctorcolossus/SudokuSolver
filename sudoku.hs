@@ -239,7 +239,7 @@ isSolved :: Board -> Bool
      a board is solved if it is completed and still valid
    input:  a board
    output: True/False -}
-isSolved board = (isCompleted board) && (isSolved board)
+isSolved board = (isCompleted board) && (isValid board)
 
 -- ***** SETTER FUNCTIONS *****
 
