@@ -119,8 +119,8 @@ getEmptySpot :: Board -> (Int, Int)
     that is empty (i.e., it has zero), if one exists;
     OK to assume that you will only call this function
    when you know that there is an empty spot
-   input:   a board
-   output:  a tuple with the coordinates (i, j) of the empty spot found
+   input:  a board
+   output: a tuple with the coordinates (i, j) of the empty spot found
    example:
      getEmptySpot [ [5,3,0,0,7,0,0,0,0],
                     [6,0,0,1,9,5,0,0,0],
@@ -137,7 +137,9 @@ getEmptySpot board = do
   (x, y)
  
 getOptions :: Board -> Int -> Int -> [Int]
--- given a board and x & y coordinates, return its set of valid possible solutions
+{- given a board and x & y coordinates, return its set of all valid possible values
+   input:  a board, x & y coordinates
+   output: the list of all possible values for the square at those coordinates -}
 getOptions board x y
   | ((board !! y) !! x) /= 0 = []
   | otherwise = do
@@ -149,77 +151,45 @@ getOptions board x y
          not (elem o usedInRow),
          not (elem o usedInCol)]
 
-impossibleElsewhereInBox :: Board -> Int -> Int -> Int -> Bool
-impossibleElsewhereInBox board i j value =
-  all (==True) [not (elem value (getOptions board x y)) |
-                x <- [3 * boxX + x | x <- [0..2]],
-                y <- [3 * boxY + y | y <- [0..2]],
-                x /= i || y /= j]
-  where
-    boxX = div i 3
-    boxY = div j 3
-
-impossibleElsewhereInRow :: Board -> Int -> Int -> Int -> Bool
-impossibleElsewhereInRow board i j value =
-  all (==True) [not (elem value (getOptions board x j)) |
-                x <- [0..8],
-                x /= i]
-
-impossibleElsewhereInCol :: Board -> Int -> Int -> Int -> Bool
-impossibleElsewhereInCol board i j value =
-  all (==True) [not (elem value (getOptions board i y)) |
-                y <- [0..8],
-                y /= j]
-
 singleOutOption :: Board -> Int -> Int -> [Int]
                    -> [(Board -> Int -> Int -> Int -> Bool)]
                    -> [Int]
-singleOutOption board x y options filters
+{- given a board, x & y coordinates, a list of possible values
+   for the square at those coordinates, and a list of predicates,
+   recursively filter predicates until only a single option remains;
+   otherwise return the original list
+   input:  a board, x & y coordinates, a list of integers, a list of predicates
+   output: a list with either one remaining value or all the original values -}
+singleOutOption board x y options predicates
   | length options == 1 = options
-  | null filters = options
+  | null predicates = options
   | otherwise = do
-      let filtered = filter ((head filters) board x y) options
+      let filtered = filter ((head predicates) board x y) options
       if null filtered
       then options
       else
         if length filtered == 1
         then filtered
-        else singleOutOption board x y options (tail filters)
+        else singleOutOption board x y options (tail predicates)
 
-mustGoInAnotherBoxInRow :: Board -> Int -> Int -> Int -> Bool
--- checks if value must be contained by one of the other two boxes in the row
-mustGoInAnotherBoxInRow board i j value =
-  any (==True) [all not
-                [elem value (getOptions board x y) |
-                 x <- [(3 * box + 0)..(3 * box + 2)],
-                 y <- [(3 * (div j 3))..(3 * (div j 3) + 2)],
-                 y /= j,
-                 ((board !! y) !! x) == 0] |
-                box <- [0..2],
-                box /= (div i 3),
-                any (==True) [elem value (getOptions board x j) |
-                              x <- [(3 * box + 0)..(3 * box + 2)]]]
-
-mustGoInAnotherBoxInCol :: Board -> Int -> Int -> Int -> Bool
--- checks if value must be contained by one of the other two boxes in the column
-mustGoInAnotherBoxInCol board i j value =
-  any (==True) [all not
-                [elem value (getOptions board x y) |
-                 x <- [(3 * (div i 3))..(3 * (div i 3) + 2)],
-                 y <- [(3 * box + 0)..(3 * box + 2)],
-                 x /= i,
-                 ((board !! y) !! x) == 0] |
-                box <- [0..2],
-                box /= (div j 3),
-                any (==True) [elem value (getOptions board i y) |
-                              y <- [(3 * box + 0)..(3 * box + 2)]]]
-
+ruleFour :: Board -> Int -> Int -> [Int] -> [Int]
+{- given a board, x & y coordinates, and a list of possible values
+   for the square at those coordinates, return the list minus values
+   which logically must go in another box in the square's row or column
+   input:  a board, x & y coordinates, a list of integers, a list of predicates
+   output: a filtered list of possible values -}
 ruleFour board x y options =
   [o | o <- options,
        not (mustGoInAnotherBoxInRow board x y o),
        not (mustGoInAnotherBoxInCol board x y o)]
 
 getFilteredOptions :: Board -> Int -> Int -> [Int]
+{- given a board, and a set of x & y coordinates,
+   gets all possible options, then filters these,
+   first applying singledOut to see if the correct value can be deduced,
+   then applying rule 4 to any remaining values
+   input:  a board, x & y coordinates
+   output: a filtered list of possible values for the square at those coordinates -}
 getFilteredOptions board x y = do
   let options = getOptions board x y
   let singledOut = singleOutOption board x y options [impossibleElsewhereInCol,
@@ -228,13 +198,12 @@ getFilteredOptions board x y = do
   if (length singledOut) == 1
   then singledOut
   else ruleFour board x y options
-  -- ruleFourOnRow board x y options
-  -- options
 
 -- ***** PREDICATE FUNCTIONS *****
 
 isGridValid :: Board -> Bool
-{- given a board, return True/False
+{- given a board, returns True/False,
+     depending on whether or not it is a 9x9 list
    depending whether the given board constitutes a valid grid
    (i.e., #rows = #cols = 9) or not
    input:  a board
@@ -269,8 +238,8 @@ isGridValid :: Board -> Bool
 isGridValid board = (getNRows board) == 9 && (getNCols board) == 9
 
 isSequenceValid :: Sequence -> Bool
-{- return True/False depending whether the given sequence is valid or not,
-   according to sudoku rules
+{- returns True/False, depending on whether or not
+     the given sequence is valid according to sudoku rules
    input:  a sequence of digits from 0-9
    output: True/False
    examples:
@@ -285,7 +254,8 @@ isSequenceValid sequence = do
   nonzero == nub nonzero
 
 areRowsValid :: Board -> Bool
-{- return True/False depending whether ALL of the row sequences are valid or not
+{- returns True/False, depending on whether
+     ALL of the row sequences are valid or not
    input:  a board
    output: True/False
    hint:   use list comprehension and isSequenceValid -}
@@ -293,14 +263,16 @@ areRowsValid board =
    all (isSequenceValid) board
 
 areColsValid :: Board -> Bool
-{- return True/False depending whether ALL of the col sequences are valid or not
+{- returns True/False, depending on whether
+     ALL of the col sequences are valid or not
    input:  a board
    output: True/False -}
 areColsValid board =
   areRowsValid (transpose board)
 
 areBoxesValid :: Board -> Bool
-{- return True/False depending whether ALL of the box sequences are valid or not
+{- returns True/False, depending on whether
+     ALL of the box sequences are valid or not
    input:  a board
    output: True/False
    hint:   use list comprehension, isSequenceValid, and getBox -}
@@ -311,8 +283,8 @@ areBoxesValid board =
                                   y <- [0..2]]]
 
 isValid :: Board -> Bool
-{- return True/False
-     depending whether the given board is valid sudoku configuration or not
+{- returns True/False, depending on whether the given board
+     is a valid sudoku configuration or not
    input:  a board
    output: True/False
    hint:   use isGridValid, areRowsValid, areColsValid, and areBoxesValid -}
@@ -322,19 +294,92 @@ isValid board = (isGridValid board) &&
                 (areBoxesValid board)
 
 isCompleted :: Board -> Bool
-{- return True/False depending whether the given board is completed or not;
-     a board is considered completed if there isn't a single empty cell
+{- returns True/False, depending on whether the given board is completed or not;
+     A board is considered completed if there isn't a single empty cell.
    input:  a board
    output: True/False
    hint:   use list comprehension and the elem function -}
 isCompleted board = and [not (elem 0 l) | l <- board]
 
 isSolved :: Board -> Bool
-{- return True/False depending whether the given board is solved or not;
-     a board is solved if it is completed and still valid
+{- returns True/False, depending on whether the given board is solved or not;
+     A board is solved if it is completed and still valid.
    input:  a board
    output: True/False -}
 isSolved board = (isCompleted board) && (isValid board)
+
+impossibleElsewhereInBox :: Board -> Int -> Int -> Int -> Bool
+{- returns True/False, depending on whether or not the value is possible
+     ELSEWHERE in the box
+   input:  a board, x & y coordinates, a proposed integer value
+             for the square at those coordinates
+   output: True/False -}
+impossibleElsewhereInBox board i j value =
+  all (==True) [not (elem value (getOptions board x y)) |
+                x <- [3 * boxX + x | x <- [0..2]],
+                y <- [3 * boxY + y | y <- [0..2]],
+                x /= i || y /= j]
+  where
+    boxX = div i 3
+    boxY = div j 3
+
+impossibleElsewhereInRow :: Board -> Int -> Int -> Int -> Bool
+{- returns True/False, depending on whether or not the value is possible
+     ELSEWHERE in the row
+   input:  a board, x & y coordinates, a proposed integer value
+             for the square at those coordinates
+   output: True/False -}
+impossibleElsewhereInRow board i j value =
+  all (==True) [not (elem value (getOptions board x j)) |
+                x <- [0..8],
+                x /= i]
+
+impossibleElsewhereInCol :: Board -> Int -> Int -> Int -> Bool
+{- returns True/False, depending on whether or not the value is possible
+     ELSEWHERE in the column
+   input:  a board, x & y coordinates, a proposed integer value
+             for the square at those coordinates
+   output: True/False -}
+impossibleElsewhereInCol board i j value =
+  all (==True) [not (elem value (getOptions board i y)) |
+                y <- [0..8],
+                y /= j]
+
+mustGoInAnotherBoxInRow :: Board -> Int -> Int -> Int -> Bool
+{- returns True/False depending whether or not the value
+     must be contained by one of the other two boxes in the row
+   input:  a board, x & y coordinates, a proposed integer value
+             for the square at those coordinates
+   output: True/False -}
+mustGoInAnotherBoxInRow board i j value =
+  any (==True) [all not
+                [elem value (getOptions board x y) |
+                 x <- [(3 * box + 0)..(3 * box + 2)],
+                 y <- [(3 * (div j 3))..(3 * (div j 3) + 2)],
+                 y /= j,
+                 ((board !! y) !! x) == 0] |
+                box <- [0..2],
+                box /= (div i 3),
+                any (==True) [elem value (getOptions board x j) |
+                              x <- [(3 * box + 0)..(3 * box + 2)]]]
+
+mustGoInAnotherBoxInCol :: Board -> Int -> Int -> Int -> Bool
+{- returns True/False depending whether or not the value
+     must be contained by one of the other two boxes in the column
+   input:  a board, x & y coordinates, a proposed integer value
+             for the square at those coordinates
+   output: True/False -}
+mustGoInAnotherBoxInCol board i j value =
+  any (==True) [all not
+                [elem value (getOptions board x y) |
+                 x <- [(3 * (div i 3))..(3 * (div i 3) + 2)],
+                 y <- [(3 * box + 0)..(3 * box + 2)],
+                 x /= i,
+                 ((board !! y) !! x) == 0] |
+                box <- [0..2],
+                box /= (div j 3),
+                any (==True) [elem value (getOptions board i y) |
+                              y <- [(3 * box + 0)..(3 * box + 2)]]]
 
 -- ***** SETTER FUNCTIONS *****
 
