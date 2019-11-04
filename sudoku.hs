@@ -150,22 +150,23 @@ getOptions board x y
          not (elem o usedInCol)]
 
 impossibleElsewhereInBox :: Board -> Int -> Int -> Int -> Bool
-impossibleElsewhereInBox board i j value = do
-  let boxX = div i 3
-  let boxY = div j 3
+impossibleElsewhereInBox board i j value =
   all (==True) [not (elem value (getOptions board x y)) |
                 x <- [3 * boxX + x | x <- [0..2]],
                 y <- [3 * boxY + y | y <- [0..2]],
                 x /= i || y /= j]
+  where
+    boxX = div i 3
+    boxY = div j 3
 
 impossibleElsewhereInRow :: Board -> Int -> Int -> Int -> Bool
-impossibleElsewhereInRow board i j value = do
+impossibleElsewhereInRow board i j value =
   all (==True) [not (elem value (getOptions board x j)) |
                 x <- [0..8],
                 x /= i]
 
 impossibleElsewhereInCol :: Board -> Int -> Int -> Int -> Bool
-impossibleElsewhereInCol board i j value = do
+impossibleElsewhereInCol board i j value =
   all (==True) [not (elem value (getOptions board i y)) |
                 y <- [0..8],
                 y /= j]
